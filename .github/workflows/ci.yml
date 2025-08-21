@@ -95,9 +95,9 @@ jobs:
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
+        id: meta
         with:
           images: |
-            finhelper/app
             ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
