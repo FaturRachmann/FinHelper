@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # Main application
+  finhelper:
+    build: .
+    container_name: finhelper-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://finhelper:finhelper123@db:5432/finhelper
+      - GOOGLE_CREDENTIALS_PATH=/app/config/google_credentials.json
+      - GOOGLE_SPREADSHEET_ID=${GOOGLE_SPREADSHEET_ID}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - ENVIRONMENT=development
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+      - ./static:/app/static
+      - ./templates:/app/templates
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - finhelper-network
+
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    container_name: finhelper-db
+    environment:
+      - POSTGRES_DB=finhelper
+      - POSTGRES_USER=finhelper
+      - POSTGRES_PASSWORD=finhelper123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finhelper -d finhelper"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - finhelper-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: finhelper-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass finhelper123
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "finhelper123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - finhelper-network
+
+  # Nginx reverse proxy (production)
+  nginx:
+    image: nginx:alpine
+    container_name: finhelper-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - finhelper
+    restart: unless-stopped
+    networks:
+      - finhelper-network
+    profiles:
+      - production
+
+  # Telegram bot service
+  telegram-bot:
+    build: 
+      context: .
+      dockerfile: Dockerfile.bot
+    container_name: finhelper-bot
+    environment:
+      - DATABASE_URL=postgresql://finhelper:finhelper123@db:5432/finhelper
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - FINHELPER_API_URL=http://finhelper:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      finhelper:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - finhelper-network
+    profiles:
+      - telegram
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  finhelper-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

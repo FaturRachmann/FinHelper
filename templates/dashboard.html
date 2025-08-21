@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinHelper - Personal Finance Dashboard</title>
+    
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <style>
+        /* Custom styles */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-wallet text-2xl"></i>
+                    <h1 class="text-xl font-bold">FinHelper</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="refreshBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg transition-all duration-200">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <div class="text-right text-sm">
+                        <div class="opacity-80">Last Updated</div>
+                        <div id="lastUpdated" class="font-medium">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 space-y-6">
+        <!-- Balance Overview -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                         <p class="text-gray-600 text-sm font-medium">Total Balance</p>
+                            <div class="loading-skeleton h-8 w-32 rounded mb-1"></div>
+                         <p id="totalBalance" class="text-2xl font-bold text-gray-900">Rp 0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-coins text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Monthly Income</p>
+                        <p id="monthlyIncome" class="text-2xl font-bold text-green-600 loading-skeleton rounded">
+                            Rp 0
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-arrow-up text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Monthly Expenses</p>
+                        <p id="monthlyExpenses" class="text-2xl font-bold text-red-600 loading-skeleton rounded">
+                            Rp 0
+                        </p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-arrow-down text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Monthly Savings</p>
+                        <p id="monthlySavings" class="text-2xl font-bold text-blue-600 loading-skeleton rounded">
+                            Rp 0
+                        </p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-piggy-bank text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Expense by Category -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                    Expenses by Category
+                </h3>
+                <div class="relative h-64">
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Monthly Cashflow -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                    Monthly Cashflow
+                </h3>
+                <div class="relative h-64">
+                    <canvas id="cashflowChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Budget Status -->
+        <section class="bg-white rounded-xl shadow-md p-6 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
+                Budget Status - <span id="currentMonth"></span>
+            </h3>
+            <div id="budgetSection">
+                <div class="loading-skeleton h-24 rounded-lg"></div>
+            </div>
+        </section>
+
+        <!-- Recent Transactions -->
+        <section class="bg-white rounded-xl shadow-md p-6 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-history text-indigo-600 mr-2"></i>
+                    Recent Transactions
+                </h3>
+                <a href="/transactions" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div id="recentTransactions">
+                <div class="space-y-3">
+                    <div class="loading-skeleton h-16 rounded-lg"></div>
+                    <div class="loading-skeleton h-16 rounded-lg"></div>
+                    <div class="loading-skeleton h-16 rounded-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="bg-white rounded-xl shadow-md p-6 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-bolt text-yellow-600 mr-2"></i>
+                Quick Actions
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="showAddTransactionModal()" class="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-plus text-blue-600 text-xl mb-2"></i>
+                    <span class="text-sm font-medium text-blue-800">Add Transaction</span>
+                </button>
+                <a href="/budgets" class="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-chart-bar text-purple-600 text-xl mb-2"></i>
+                    <span class="text-sm font-medium text-purple-800">Manage Budgets</span>
+                </a>
+                <button onclick="syncToSheets()" class="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200">
+                    <i class="fab fa-google text-green-600 text-xl mb-2"></i>
+                    <span class="text-sm font-medium text-green-800">Sync to Sheets</span>
+                </button>
+                <button onclick="exportReport()" class="flex flex-col items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-download text-orange-600 text-xl mb-2"></i>
+                    <span class="text-sm font-medium text-orange-800">Export Report</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Transaction Modal -->
+    <div id="addTransactionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Add New Transaction</h3>
+                <button onclick="closeAddTransactionModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addTransactionForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount (Rp)</label>
+                    <input type="number" id="amount" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="transactionType" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Type</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Merchant/Source</label>
+                    <input type="text" id="merchant" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeAddTransactionModal()" class="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        Add Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="hidden fixed top-4 right-4 z-50">
+        <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-lg p-4 max-w-md">
+            <div class="flex items-center">
+                <i id="notificationIcon" class="fas fa-check-circle text-green-500 mr-3"></i>
+                <div>
+                    <p id="notificationTitle" class="font-semibold text-gray-900"></p>
+                    <p id="notificationMessage" class="text-sm text-gray-600"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

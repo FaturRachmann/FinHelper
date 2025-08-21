@@ -1,0 +1,146 @@
+education:
+  category_name: Education
+  keywords:
+  - sekolah
+  - universitas
+  - kursus
+  - course
+  - training
+  - seminar
+  - buku
+  - book
+  patterns:
+  - .*school.*
+  - .*university.*
+  - .*course.*
+  - .*training.*
+entertainment:
+  category_name: Entertainment
+  keywords:
+  - netflix
+  - spotify
+  - cinema
+  - bioskop
+  - game
+  - steam
+  - playstation
+  - xbox
+  patterns:
+  - .*entertainment.*
+  - .*movie.*
+  - .*music.*
+  - .*game.*
+food_and_dining:
+  category_name: Food & Dining
+  keywords:
+  - grab
+  - gojek
+  - mcdonald
+  - kfc
+  - starbucks
+  - restoran
+  - warung
+  - bakso
+  - nasi
+  - ayam
+  patterns:
+  - grab.*food
+  - go.*food
+  - .*restaurant.*
+  - .*cafe.*
+healthcare:
+  category_name: Healthcare
+  keywords:
+  - hospital
+  - rumah sakit
+  - dokter
+  - apotik
+  - farmasi
+  - obat
+  - medical
+  - klinik
+  patterns:
+  - .*hospital.*
+  - .*medical.*
+  - .*pharmacy.*
+income_investment:
+  category_name: Investment Return
+  keywords:
+  - dividend
+  - dividen
+  - bunga
+  - interest
+  - profit
+  - keuntungan
+  - return
+  patterns:
+  - .*dividend.*
+  - .*interest.*
+  - .*return.*
+  transaction_type: income
+income_salary:
+  category_name: Salary
+  keywords:
+  - gaji
+  - salary
+  - bonus
+  - tunjangan
+  - allowance
+  - payroll
+  patterns:
+  - .*salary.*
+  - .*payroll.*
+  - .*income.*
+  transaction_type: income
+shopping:
+  category_name: Shopping
+  keywords:
+  - tokopedia
+  - shopee
+  - lazada
+  - blibli
+  - amazon
+  - mall
+  - supermarket
+  - indomaret
+  - alfamart
+  patterns:
+  - .*shop.*
+  - .*market.*
+  - .*store.*
+transportation:
+  category_name: Transportation
+  keywords:
+  - grab.*car
+  - grab.*bike
+  - gojek.*ride
+  - uber
+  - taxi
+  - ojek
+  - angkot
+  - transjakarta
+  - mrt
+  - krl
+  patterns:
+  - grab.*ride
+  - go.*ride
+  - .*transport.*
+  - .*taxi.*
+utilities:
+  category_name: Utilities
+  keywords:
+  - pln
+  - listrik
+  - air
+  - pdam
+  - internet
+  - wifi
+  - telkom
+  - indihome
+  - gas
+  - pgas
+  patterns:
+  - .*electric.*
+  - .*water.*
+  - .*internet.*
+  - .*gas.*
