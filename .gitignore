@@ -9,6 +9,11 @@ __pycache__/
 # Python cache
 __pycache__/
 *.pyc
+__pycache__/
+*.pyc
+.env
+*.db
+config/google_credentials.json
 
 # Environment
 .env
