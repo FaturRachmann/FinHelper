@@ -2,7 +2,7 @@
 
 FinHelper adalah aplikasi **manajemen keuangan pribadi** berbasis web yang membantu melacak pemasukan, pengeluaran, anggaran, dan menampilkan laporan finansial secara interaktif.
 
-![Dashboard Preview](./FinHelper%20-%20Personal%20Finance%20Dashboard.png)
+<img width="1366" height="1128" alt="FinHelper - Personal Finance Dashboard" src="https://github.com/user-attachments/assets/26405fd8-2b42-47a1-96be-ecd3ca7ef0e0" />
 
 ---
 
