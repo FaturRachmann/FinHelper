@@ -1,5 +1,9 @@
 name: FinHelper CI/CD Pipeline
 
+permissions:
+  contents: read
+  packages: write   # 🔑 wajib supaya bisa push ke GHCR
+
 on:
   push:
     branches: [ main, develop ]
