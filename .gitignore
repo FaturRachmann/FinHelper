@@ -6,6 +6,19 @@ __pycache__/
 # C extensions
 *.so
 
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Database
+*.db
+
+# Config & credentials
+config/google_credentials.json
+
 # Distribution / packaging
 .Python
 build/
